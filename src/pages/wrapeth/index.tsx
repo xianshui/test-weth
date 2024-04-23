@@ -19,56 +19,44 @@ import { ethers } from 'ethers'
 import { clsx } from 'clsx'
 
 const TOKEN_ADDRESS = '0xd0df82de051244f04bff3a8bb1f62e1cd39eed92'
-//const TOKEN_ADDRESS = '0xf531B8F309Be94191af87605CfBf600D71C2cFe0'
 
-const abi2 = [
+const abi = [
   'function approve(address spender, uint256 amount) public returns (bool)',
   'function balanceOf(address addr) external view returns (uint256)',
   'function deposit() payable external',
   'function withdraw(uint256 amount) external',
 ]
 
-const Pledge = () => {
-  const [sliderValue, setSliderValue] = useState<string>('')
+const WrapEthPage = () => {
+  const [amount, setAmount] = useState<string>('')
   const { disconnect } = useDisconnect()
   const { isConnected, address, openWalletModal } = useWallet()
   const provider = useAtomValue<any>(providerWeb3Modal)
-  const signerValue = useAtomValue<any>(signerWeb3Modal)
-  const [balance, setBalance] = useState<any>(0)
-  const [wethBalance, setWethBalance] = useState<any>(0)
+  const signer = useAtomValue<any>(signerWeb3Modal)
+  const [balance, setBalance] = useState('0')
+  const [wethBalance, setWethBalance] = useState('0')
   const [incrementer, setIncrementer] = useState<ethers.Contract>()
   const toast = useToast()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  // 初始化余额 / 更新
   const initBalance = async (incre: ethers.Contract) => {
     if (!address) return
-    /*const totalBalanceOf = await incre.totalBalanceOf(address)
-    const getAvailable = await incre.availableBalanceOf(address)
-    const poolTotalBalance = await incre.poolTotalBalance()
-
-    setTotalValueLocked(ethers.utils.formatEther(totalBalanceOf))
-    setAvailableVal(ethers.utils.formatEther(getAvailable))
-    setPoolTotal(ethers.utils.formatEther(poolTotalBalance))*/
     provider
       ?.getBalance(address)
       .then((res: any) => setBalance(ethers.utils.formatEther(res)))
 
     const ba = await incre.balanceOf(address)
     const value = ethers.utils.formatEther(ba)
-    console.log('>>value', ba, value)
     setWethBalance(value)
   }
 
-  // 存入
   const onClickWrap = async () => {
-    if (sliderValue === '0' || sliderValue === '') return
+    if (amount === '0' || amount === '') return
     try {
-      let num = ethers.utils.parseEther(sliderValue)
+      let num = ethers.utils.parseEther(amount)
 
-      console.log('>>value', sliderValue, num)
-      if (sliderValue > balance) {
+      if (amount > balance) {
         toast({
           description: 'Amount should be smaller than ETH balance',
           position: 'top',
@@ -82,9 +70,8 @@ const Pledge = () => {
         value: num,
       })
       setLoading(true)
-      const waits = await res.wait()
+      const results = await res.wait()
       initBalance(incrementer as ethers.Contract)
-      console.log('存入 wait', waits)
       setLoading(false)
       toast({
         description: JSON.stringify('Wrap ETH successfully!'),
@@ -94,7 +81,6 @@ const Pledge = () => {
         isClosable: true,
       })
     } catch (err) {
-      console.log('err', err)
       toast({
         description: JSON.stringify(err),
         position: 'top',
@@ -105,12 +91,11 @@ const Pledge = () => {
     }
   }
 
-  // 取出
   const onClickUnwrap = async () => {
-    if (sliderValue === '0' || sliderValue === '') return
-    if (sliderValue > wethBalance) {
+    if (amount === '0' || amount === '') return
+    if (amount > wethBalance) {
       toast({
-        description: 'Amount should be smaller than ETH balance',
+        description: 'Amount should be smaller than WETH balance',
         position: 'top',
         duration: 2000,
         status: 'error',
@@ -119,15 +104,14 @@ const Pledge = () => {
       return
     }
     try {
-      let num = ethers.utils.parseEther(sliderValue)
+      let num = ethers.utils.parseEther(amount)
 
       const res = await incrementer?.withdraw(num)
 
       setLoading(true)
-      const waits = await res.wait()
+      const result = await res.wait()
 
       initBalance(incrementer as ethers.Contract)
-      console.log('取出 wait', waits)
       setLoading(false)
 
       toast({
@@ -138,7 +122,6 @@ const Pledge = () => {
         isClosable: true,
       })
     } catch (err) {
-      console.log('err', err)
       toast({
         description: JSON.stringify(err),
         position: 'top',
@@ -155,17 +138,16 @@ const Pledge = () => {
         ?.getBalance(address)
         .then((res: any) => setBalance(ethers.utils.formatEther(res)))
     } else {
-      setBalance(0.0)
+      setBalance('0.0')
     }
   }, [isConnected, address, provider])
 
-  // get contract obj
   useEffect(() => {
-    let incre2 = new ethers.Contract(TOKEN_ADDRESS, abi2, signerValue)
+    let incre2 = new ethers.Contract(TOKEN_ADDRESS, abi, signer)
     initBalance(incre2)
 
     setIncrementer(incre2)
-  }, [signerValue])
+  }, [signer])
 
   return (
     <Layout>
@@ -200,8 +182,8 @@ const Pledge = () => {
               placeholder="Input amount"
               size="lg"
               color={'#fff'}
-              value={sliderValue}
-              onChange={(e) => setSliderValue(e.target.value)}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
             />
           </InputGroup>
           <div className="mt-4 flex w-full flex-row items-center justify-center">
@@ -268,4 +250,4 @@ const Pledge = () => {
   )
 }
 
-export default dynamic(() => Promise.resolve(Pledge), { ssr: false })
+export default dynamic(() => Promise.resolve(WrapEthPage), { ssr: false })

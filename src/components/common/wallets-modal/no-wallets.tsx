@@ -1,6 +1,3 @@
-// import Coin98Icon from '@/components/icons/coin98-icon'
-// import CoinbaseIcon from '@/components/icons/coinbase-icon'
-// import MetamaskIcon from '@/components/icons/metamask-icon'
 import { jump } from '@/utils'
 import { Button, Text } from '@chakra-ui/react'
 
