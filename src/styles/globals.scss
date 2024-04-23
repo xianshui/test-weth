@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './markdown.scss';
+
+:root {
+  --a1: #161628;
+  --a2: #4f4f66;
+  --a3: #7f7f91;
+  --a4: #bfbfc8;
+  --a5: #e9e9ed;
+  --a6: #f3f3f8;
+  --a7: #f9f9fb;
+  --down: #e30051;
+  --up: #0a9068;
+  --primary: #ff2442;
+}
+
+.redd__select {
+  .redd__control {
+    @apply rounded-md border-a5 shadow-none focus-within:border-a3 hover:border-a3;
+  }
+  .redd__indicator-separator {
+    @apply hidden;
+  }
+  .redd__indicator {
+    @apply -rotate-0 text-a3 transition-all duration-300 hover:text-a3;
+  }
+  .redd__control--menu-is-open {
+    .redd__indicator {
+      @apply rotate-180;
+    }
+  }
+  .redd__menu {
+    @apply mt-2 rounded-2xl;
+    box-shadow: 0px 1px 6px rgba(79, 79, 102, 0.2);
+  }
+  .redd__option {
+    @apply tw-align-center h-12 bg-transparent px-4 text-sm hover:bg-a7;
+    @apply bg-gradient-to-t from-a6 to-a5 bg-[length:calc(100%-32px)_1px] bg-bottom bg-no-repeat;
+  }
+  .redd__option--is-selected {
+    @apply bg-a7 text-a2;
+  }
+  .redd__menu-list {
+    @apply rounded-2xl py-0;
+  }
+}
+
+html.dark {
+  --background: black;
+  --foreground: white;
+}
+
+body {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
+}
