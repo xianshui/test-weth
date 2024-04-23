@@ -35,20 +35,24 @@ const WrapEthPage = () => {
   const signer = useAtomValue<any>(signerWeb3Modal)
   const [balance, setBalance] = useState('0')
   const [wethBalance, setWethBalance] = useState('0')
-  const [incrementer, setIncrementer] = useState<ethers.Contract>()
+  const [contract, setContract] = useState<ethers.Contract>()
   const toast = useToast()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const initBalance = async (incre: ethers.Contract) => {
+  const updateBalance = async (contract: ethers.Contract) => {
     if (!address) return
     provider
       ?.getBalance(address)
       .then((res: any) => setBalance(ethers.utils.formatEther(res)))
 
-    const ba = await incre.balanceOf(address)
-    const value = ethers.utils.formatEther(ba)
-    setWethBalance(value)
+    try {
+      const ba = await contract.balanceOf(address)
+      const value = ethers.utils.formatEther(ba)
+      setWethBalance(value)
+    } catch (e) {
+      setWethBalance('0')
+    }
   }
 
   const onClickWrap = async () => {
@@ -56,7 +60,7 @@ const WrapEthPage = () => {
     try {
       let num = ethers.utils.parseEther(amount)
 
-      if (amount > balance) {
+      if (parseFloat(amount) > parseFloat(balance)) {
         toast({
           description: 'Amount should be smaller than ETH balance',
           position: 'top',
@@ -66,12 +70,12 @@ const WrapEthPage = () => {
         })
         return
       }
-      const res = await incrementer?.deposit({
+      const res = await contract?.deposit({
         value: num,
       })
       setLoading(true)
       const results = await res.wait()
-      initBalance(incrementer as ethers.Contract)
+      updateBalance(contract as ethers.Contract)
       setLoading(false)
       toast({
         description: JSON.stringify('Wrap ETH successfully!'),
@@ -93,7 +97,7 @@ const WrapEthPage = () => {
 
   const onClickUnwrap = async () => {
     if (amount === '0' || amount === '') return
-    if (amount > wethBalance) {
+    if (parseFloat(amount) > parseFloat(wethBalance)) {
       toast({
         description: 'Amount should be smaller than WETH balance',
         position: 'top',
@@ -106,12 +110,12 @@ const WrapEthPage = () => {
     try {
       let num = ethers.utils.parseEther(amount)
 
-      const res = await incrementer?.withdraw(num)
+      const res = await contract?.withdraw(num)
 
       setLoading(true)
       const result = await res.wait()
 
-      initBalance(incrementer as ethers.Contract)
+      updateBalance(contract as ethers.Contract)
       setLoading(false)
 
       toast({
@@ -143,10 +147,10 @@ const WrapEthPage = () => {
   }, [isConnected, address, provider])
 
   useEffect(() => {
-    let incre2 = new ethers.Contract(TOKEN_ADDRESS, abi, signer)
-    initBalance(incre2)
+    let wethContract = new ethers.Contract(TOKEN_ADDRESS, abi, signer)
+    updateBalance(wethContract)
 
-    setIncrementer(incre2)
+    setContract(wethContract)
   }, [signer])
 
   return (

@@ -19,14 +19,21 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     let providerWeb3Modal: any = ''
     let signerWeb3Modal = ''
-    ;(async function collect() {
-      providerWeb3Modal = new ethers.providers.Web3Provider(
-        window.ethereum as any,
-      )
+    const ethereum = window.ethereum as any
+
+    const updateProviderAndSigner = async () => {
+      providerWeb3Modal = new ethers.providers.Web3Provider(ethereum)
       setProviderWeb3Modal(providerWeb3Modal)
+
       signerWeb3Modal = await providerWeb3Modal.getSigner()
       setSignerWeb3Modal(signerWeb3Modal)
-    })()
+    }
+
+    ethereum?.on('chainChanged', async () => {
+      updateProviderAndSigner()
+    })
+
+    updateProviderAndSigner()
   }, [])
 
   return (

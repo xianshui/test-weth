@@ -1,12 +1,12 @@
 import React from 'react'
 import { WagmiConfig, configureChains, createConfig } from 'wagmi'
-import { optimism } from 'wagmi/chains'
+import { sepolia } from 'wagmi/chains'
 import { publicProvider } from 'wagmi/providers/public'
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { Coin98Connector } from './coin98-connector'
 
-const { chains, publicClient } = configureChains([optimism], [publicProvider()])
+const { chains, publicClient } = configureChains([sepolia], [publicProvider()])
 
 const config = createConfig({
   autoConnect: true,
